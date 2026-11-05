@@ -1,0 +1,51 @@
+{
+  "data": {
+    "root": "MAGFiLO_1.0_Kaggle_2026",
+    "ann_file": "train/MAGFiLO_1.0_Annotations_kaggle2026_train.json",
+    "split_file": "v2/splits/week5_seed42/fold1.json",
+    "group_by": "week",
+    "seed": 42,
+    "patch_size": 512,
+    "samples_per_image": 2,
+    "mean": 0.4254,
+    "std": 0.0809,
+    "preprocess": "flatten",
+    "preprocess_cache": "cache/preprocess/flatten",
+    "mask_offdisk": false,
+    "offdisk_value": -3.0,
+    "num_workers": 8
+  },
+  "model": {
+    "backbone": "pvt_v2_b2",
+    "pretrained": true,
+    "in_chans": 1,
+    "decoder_dim": 128,
+    "out_ch": 1,
+    "dropout": 0.0,
+    "stem_ch": 32
+  },
+  "train": {
+    "loss": "bce_dice",
+    "epochs": 160,
+    "batch_size": 12,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "warmup_epochs": 2,
+    "amp": true,
+    "amp_dtype": "bf16",
+    "grad_clip": 1.0,
+    "bce_weight": 0.5,
+    "dice_weight": 0.5,
+    "val_every": 1,
+    "val_images": 0,
+    "early_stop_patience": 30,
+    "early_stop_min_delta": 0.002,
+    "out_dir": "v2/runs",
+    "run_name": "phase4_pvt_fold1"
+  },
+  "eval": {
+    "threshold": 0.5,
+    "min_area": 512,
+    "batch_size": 1
+  }
+}

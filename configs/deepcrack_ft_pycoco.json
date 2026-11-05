@@ -1,0 +1,52 @@
+{
+  "data": {
+    "root": "MAGFiLO_1.0_Kaggle_2026",
+    "ann_file": "train/MAGFiLO_1.0_Annotations_kaggle2026_train.json",
+    "split_file": "splits/date_seed42.json",
+    "group_by": "date",
+    "val_frac": 0.2,
+    "seed": 42,
+    "patch_size": 256,
+    "samples_per_image": 8,
+    "tiled": false,
+    "mean": 0.0,
+    "std": 1.0,
+    "num_workers": 10,
+    "sampler": "positive_crop",
+    "p_positive": 0.5,
+    "p_limb": 0.2,
+    "limb_width": 24,
+    "dedup_val_files": true
+  },
+  "model": {
+    "arch": "deepcrack",
+    "ngf": 64,
+    "in_chans": 1,
+    "pretrained": true,
+    "pretrained_weights": null
+  },
+  "train": {
+    "epochs": 10,
+    "batch_size": 16,
+    "lr": 0.0001,
+    "weight_decay": 0.0001,
+    "warmup_epochs": 1,
+    "amp": true,
+    "grad_clip": 1.0,
+    "loss": "border_aware",
+    "bce_weight": 0.5,
+    "dice_weight": 0.5,
+    "border_margin": 16,
+    "border_floor": 0.0,
+    "val_every": 1,
+    "val_images": 64,
+    "out_dir": "runs",
+    "run_name": "deepcrack_ft_256_pycoco",
+    "init_ckpt": "runs/deepcrack_ft_256/best.pt"
+  },
+  "eval": {
+    "threshold": 0.5,
+    "min_area": 512,
+    "batch_size": 1
+  }
+}

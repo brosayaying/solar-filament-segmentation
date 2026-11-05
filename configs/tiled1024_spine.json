@@ -1,0 +1,27 @@
+{
+  "data": {
+    "patch_size": 1024,
+    "tiled": true,
+    "samples_per_image": 1,
+    "spine_thickness": 3,
+    "num_workers": 10
+  },
+  "model": {
+    "backbone": "resnet34",
+    "decoder_dim": 128,
+    "aux_spine": true
+  },
+  "train": {
+    "epochs": 12,
+    "batch_size": 8,
+    "lr": 0.0003,
+    "val_images": 64,
+    "spine_weight": 0.5,
+    "run_name": "tiled1024_spine"
+  },
+  "eval": {
+    "threshold": 0.55,
+    "min_area": 512,
+    "batch_size": 1
+  }
+}

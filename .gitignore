@@ -1,0 +1,61 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# MCP config (contains Kaggle token)
+.mcp.json
+
+# Kaggle credentials
+kaggle.json
+
+# Competition data (719 MB, re-downloadable)
+MAGFiLO_1.0_Kaggle_2026/
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Model artifacts
+#
+# Checkpoints are 108 MB each, which is over GitHub's 100 MB hard file limit.
+# They are published as release assets instead; `scripts/fetch_weights.py`
+# downloads them. Committing them would make the repo unclonable.
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.joblib
+runs/
+wandb/
+
+# Derived data caches (rebuilt by scripts/build_*.py)
+cache/
+v2/data/
+v2/runs/
+
+# Experiment artifacts
+#
+# These are outputs, not source. They are large and regenerable, and they make
+# a clone slow for anyone trying to read the code.
+#
+# Per-image diagnostic dumps: 1,896 PNGs, 832 MB.
+docs/DEEPCRACK_FINETUNE/
+# Per-image probability arrays: 48 MB of .npy.
+docs/DEEPCRACK/*.npy
+docs/EDGE/*.npy
+docs/HEATMAP/*.npy
+# Large sample montages.
+docs/samples_full.png
+docs/samples_crops.png
+docs/25.pdf
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~

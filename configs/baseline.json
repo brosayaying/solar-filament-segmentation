@@ -1,0 +1,18 @@
+{
+  "data": {
+    "patch_size": 512,
+    "samples_per_image": 2,
+    "num_workers": 10
+  },
+  "model": {
+    "backbone": "resnet34",
+    "decoder_dim": 128
+  },
+  "train": {
+    "epochs": 25,
+    "batch_size": 12,
+    "lr": 0.0003,
+    "val_images": 64,
+    "run_name": "baseline_resnet34"
+  }
+}

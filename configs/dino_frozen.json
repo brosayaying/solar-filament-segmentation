@@ -1,0 +1,47 @@
+{
+  "data": {
+    "root": "MAGFiLO_1.0_Kaggle_2026",
+    "ann_file": "train/MAGFiLO_1.0_Annotations_kaggle2026_train.json",
+    "split_file": "splits/date_seed42.json",
+    "group_by": "date",
+    "val_frac": 0.2,
+    "seed": 42,
+    "patch_size": 518,
+    "samples_per_image": 2,
+    "mean": 0.5,
+    "std": 0.25,
+    "num_workers": 8
+  },
+  "model": {
+    "arch": "dino_unet",
+    "backbone": "vit_small_patch14_dinov2",
+    "pretrained": true,
+    "freeze_encoder": true,
+    "layers": [2, 5, 8, 11],
+    "decoder_dim": 128,
+    "stem_dim": 64,
+    "out_ch": 1,
+    "dropout": 0.0
+  },
+  "train": {
+    "epochs": 40,
+    "batch_size": 8,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "warmup_epochs": 1,
+    "amp": true,
+    "grad_clip": 1.0,
+    "bce_weight": 0.5,
+    "dice_weight": 0.5,
+    "val_every": 1,
+    "val_images": 64,
+    "out_dir": "runs",
+    "run_name": "dino_frozen_518_v2"
+  },
+  "eval": {
+    "threshold": 0.55,
+    "min_area": 512,
+    "batch_size": 1,
+    "tile": 518
+  }
+}

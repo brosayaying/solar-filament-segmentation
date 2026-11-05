@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: solar-filament
+Version: 0.1.0
+Summary: Solar filament segmentation for the MAGFiLO Kaggle 2026 challenge
+Requires-Python: >=3.10
+Requires-Dist: torch>=2.4
+Requires-Dist: torchvision>=0.19
+Requires-Dist: timm>=1.0
+Requires-Dist: numpy>=1.26
+Requires-Dist: opencv-python-headless>=4.9
+Requires-Dist: pycocotools>=2.0.7
+Requires-Dist: scipy>=1.11
+Requires-Dist: pillow>=10.0
+Requires-Dist: tqdm>=4.66
+Requires-Dist: pandas>=2.0
+Requires-Dist: matplotlib>=3.8

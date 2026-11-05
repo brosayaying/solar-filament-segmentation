@@ -1,0 +1,35 @@
+{
+  "data": {
+    "root": "MAGFiLO_1.0_Kaggle_2026",
+    "ann_file": "train/MAGFiLO_1.0_Annotations_kaggle2026_train.json",
+    "split_file": "splits/date_seed42.json",
+    "group_by": "date",
+    "val_frac": 0.2,
+    "seed": 42,
+    "mean": 0.5,
+    "std": 0.25,
+    "num_workers": 10
+  },
+  "detector": {
+    "backbone": "resnet34",
+    "pretrained": true,
+    "in_chans": 1,
+    "decoder_dim": 96,
+    "dilations": [2, 4],
+    "with_size": false,
+    "out_stride": 4,
+    "patch_size": 512,
+    "batch_size": 10,
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "warmup_epochs": 1,
+    "epochs": 30,
+    "foreground_bias": 0.75,
+    "score_threshold": 0.2,
+    "nms_dist": 40,
+    "val_every": 1,
+    "val_images": 64,
+    "run_name": "spine_s4_long"
+  },
+  "train": {"out_dir": "runs"}
+}
