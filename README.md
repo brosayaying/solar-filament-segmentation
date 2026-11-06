@@ -3,7 +3,53 @@
 Harness for the [Solar Filament Segmentation Challenge 2026](https://www.kaggle.com/competitions/filament-segmentation-2026).
 Competition details, metric definition, and submission rules: [`docs/COMPETITION.md`](docs/COMPETITION.md).
 
-## Quick start
+## Results
+
+| Stage | Pooled OOF PQ | 95% CI | Public LB |
+|---|---|---|---|
+| Phase 1 — segmentation only | 0.4220 | [0.4144, 0.4299] | 0.36 |
+| Phase 2 — + candidate re-scoring | **0.4406** | [0.4109, 0.4703] | **0.38** |
+
+Paired gain of Phase 2 over Phase 1: **+0.0154**, CI [+0.0109, +0.0199] over
+2,000 bootstraps on 707 files. Pooled OOF scores every file with the fold that
+did not train on it, against every annotator copy — the same protocol as the
+official scorer.
+
+Two experiments failed and are documented rather than hidden:
+
+| Stage | Change | Result |
+|---|---|---|
+| Phase 3 | GONG label transfer, 3.1× training data | **−0.0150** PQ |
+| Phase 4 | PVTv2-B2 ensemble diversity | **−0.0113** PQ, corr 0.913 |
+
+## Reproducing the submission
+
+```bash
+# 1. environment
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# 2. weights (~994 MB, from the GitHub release)
+python scripts/fetch_weights.py
+
+# 3. competition data
+#    Download from Kaggle into ./MAGFiLO_1.0_Kaggle_2026/
+#    (train/train_images, train/*.json, test/test_images)
+
+# 4. predictions -> submission CSV
+python v2/scripts/predict_test_phase2.py --stage probs
+python v2/scripts/predict_test_phase2.py --stage submit
+```
+
+`notebooks/pipeline.ipynb` walks through the same steps with explanations and
+visualisations, and is the fastest way to understand the method.
+
+Inference runs fully offline: `build_model` is called with `pretrained=False`
+because the checkpoint supplies every weight, so no Hugging Face download is
+needed. Verified with `load_state_dict(..., strict=True)` reporting all keys
+matched.
+
+## Quick start (development)
 
 ```bash
 source .venv/bin/activate          # torch 2.6 + cu124, timm, pycocotools

@@ -1,0 +1,47 @@
+# Pinned environment for the MAGFiLO 2026 solar filament pipeline.
+#
+# Verified against the environment that produced the submitted predictions:
+#   Python 3.12.3, CUDA 13.0, NVIDIA RTX 3090 (24 GB)
+#
+# Install:
+#   python -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+# CPU-only installs work for inference but are slow: a 2048x2048 image takes
+# roughly 4 s per fold on CPU against 0.15 s on the GPU above.
+#
+# torch is pinned to the CUDA 13.0 build. On a machine with a different CUDA
+# driver, install torch from the matching index first and then run
+# `pip install -r requirements.txt`; the pin below will be satisfied by any
+# 2.14.1 build.
+
+# --- deep learning -------------------------------------------------------
+torch==2.14.1
+torchvision==0.29.1
+timm==1.0.30
+
+# --- numerics ------------------------------------------------------------
+numpy==2.5.4
+scipy==1.18.1
+scikit-learn==1.9.1
+joblib==1.6.0
+
+# --- imaging -------------------------------------------------------------
+opencv-python-headless==5.0.0.93
+pillow==13.0.0
+
+# --- evaluation ----------------------------------------------------------
+# pycocotools is the reference implementation of the COCO mask API. The
+# competition's official scorer uses it, so using anything else risks
+# disagreeing with the leaderboard on RLE encoding.
+pycocotools==2.0.11
+
+# --- data handling / plotting -------------------------------------------
+pandas==3.1.0
+matplotlib==3.11.2
+tqdm==4.70.1
+
+# --- optional: GONG archive access (Phase 3 only) ------------------------
+# Only needed to re-download the GONG frames used for the label-transfer
+# experiment. Not required to reproduce the submitted predictions.
+astropy==8.0.2
