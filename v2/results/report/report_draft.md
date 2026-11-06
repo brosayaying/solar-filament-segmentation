@@ -104,6 +104,60 @@ and the oracle gain from removing every fragment is
 it was built. The false positives are overwhelmingly background and unmatched
 ground truth, not fragments.
 
+## Error distributions
+
+PQ is a single scalar and it hides the shape of the error. The rubric asks for
+three further views, all measured here on the same 707 out-of-fold files with
+the shipped post-processing.
+
+### IoU and Dice
+
+There are three populations and they answer different questions, so all three
+are reported. Quoting only the first would flatter the system by hiding the
+misses; quoting only the second would hide that boundaries are good when the
+instance is found.
+
+| Population | n | IoU mean | IoU p50 | Dice mean | Dice p50 | Dice >= 0.75 |
+|---|---|---|---|---|---|---|
+| Matched pairs (SQ view) | 5,259 | 0.676 | 0.682 | 0.804 | 0.811 | 77.5% |
+| Per ground-truth (misses = 0) | 8,199 | 0.501 | 0.598 | 0.614 | 0.749 | 49.7% |
+| Per prediction (FPs = 0) | 8,662 | 0.481 | 0.583 | 0.591 | 0.737 | 47.0% |
+
+The gap between the first two rows is the whole story. When an instance is
+matched, Dice averages 0.804 and
+77.5% of matches exceed 0.75 —
+the boundaries are good. Across *all* ground-truth instances the mean falls to
+0.614, because
+16.7% of filaments score below 0.10,
+i.e. were missed entirely.
+
+So the error is dominated by **detection**, not delineation. That is consistent
+with SQ being pinned near 0.68 across every architecture tried while RQ moves.
+
+![IoU distribution](../figures/iou_distribution.png)
+
+![Dice distribution](../figures/dice_distribution.png)
+
+### One-to-many and many-to-one
+
+PQ's denominator charges $0.5|FP| + 0.5|FN|$, so splitting one filament into
+three costs almost as much as missing it. The relation histogram shows how often
+that happens.
+
+| Relation | IoU > 0.1 | IoU > 0.5 |
+|---|---|---|
+| One GT overlapped by k > 1 predictions (fragmentation) | 4.8% | 0.0% |
+| One prediction overlapping k > 1 GT (merging) | 1.8% | 0.0% |
+
+At the metric's own matching threshold of 0.5 there is **no** fragmentation or
+merging at all: every overlap is a clean 1:1 or nothing. The multi-relations
+that do exist live at loose overlaps (IoU > 0.1), where a prediction grazes a
+neighbouring filament without competing for the match.
+
+This is why the fragment-merging stage was cancelled. There is nothing to merge.
+
+![Instance relations](../figures/instance_relations.png)
+
 ## Submission
 
 1093 filaments across 180 test images,

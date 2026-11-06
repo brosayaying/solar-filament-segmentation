@@ -165,6 +165,99 @@ and the oracle gain from removing every fragment is
 <strong>+0.0015</strong>. The stage was cancelled before
 it was built. The false positives are overwhelmingly background and unmatched
 ground truth, not fragments.</p>
+<h2>Error distributions</h2>
+<p>PQ is a single scalar and it hides the shape of the error. The rubric asks for
+three further views, all measured here on the same 707 out-of-fold files with
+the shipped post-processing.</p>
+<h3>IoU and Dice</h3>
+<p>There are three populations and they answer different questions, so all three
+are reported. Quoting only the first would flatter the system by hiding the
+misses; quoting only the second would hide that boundaries are good when the
+instance is found.</p>
+<table>
+<thead>
+<tr>
+<th>Population</th>
+<th>n</th>
+<th>IoU mean</th>
+<th>IoU p50</th>
+<th>Dice mean</th>
+<th>Dice p50</th>
+<th>Dice &gt;= 0.75</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Matched pairs (SQ view)</td>
+<td>5,259</td>
+<td>0.676</td>
+<td>0.682</td>
+<td>0.804</td>
+<td>0.811</td>
+<td>77.5%</td>
+</tr>
+<tr>
+<td>Per ground-truth (misses = 0)</td>
+<td>8,199</td>
+<td>0.501</td>
+<td>0.598</td>
+<td>0.614</td>
+<td>0.749</td>
+<td>49.7%</td>
+</tr>
+<tr>
+<td>Per prediction (FPs = 0)</td>
+<td>8,662</td>
+<td>0.481</td>
+<td>0.583</td>
+<td>0.591</td>
+<td>0.737</td>
+<td>47.0%</td>
+</tr>
+</tbody>
+</table>
+<p>The gap between the first two rows is the whole story. When an instance is
+matched, Dice averages 0.804 and
+77.5% of matches exceed 0.75 —
+the boundaries are good. Across <em>all</em> ground-truth instances the mean falls to
+0.614, because
+16.7% of filaments score below 0.10,
+i.e. were missed entirely.</p>
+<p>So the error is dominated by <strong>detection</strong>, not delineation. That is consistent
+with SQ being pinned near 0.68 across every architecture tried while RQ moves.</p>
+<p><img alt="IoU distribution" src="../figures/iou_distribution.png" /></p>
+<p><img alt="Dice distribution" src="../figures/dice_distribution.png" /></p>
+<h3>One-to-many and many-to-one</h3>
+<p>PQ's denominator charges $0.5|FP| + 0.5|FN|$, so splitting one filament into
+three costs almost as much as missing it. The relation histogram shows how often
+that happens.</p>
+<table>
+<thead>
+<tr>
+<th>Relation</th>
+<th>IoU &gt; 0.1</th>
+<th>IoU &gt; 0.5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One GT overlapped by k &gt; 1 predictions (fragmentation)</td>
+<td>4.8%</td>
+<td>0.0%</td>
+</tr>
+<tr>
+<td>One prediction overlapping k &gt; 1 GT (merging)</td>
+<td>1.8%</td>
+<td>0.0%</td>
+</tr>
+</tbody>
+</table>
+<p>At the metric's own matching threshold of 0.5 there is <strong>no</strong> fragmentation or
+merging at all: every overlap is a clean 1:1 or nothing. The multi-relations
+that do exist live at loose overlaps (IoU &gt; 0.1), where a prediction grazes a
+neighbouring filament without competing for the match.</p>
+<p>This is why the fragment-merging stage was cancelled. There is nothing to merge.</p>
+<p><img alt="Instance relations" src="../figures/instance_relations.png" /></p>
 <h2>Submission</h2>
 <p>1093 filaments across 180 test images,
 with 3 images predicted empty. The local-to-public gap is

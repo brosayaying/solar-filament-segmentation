@@ -105,6 +105,42 @@
     "fragment_fraction": 0.018,
     "fragment_oracle_gain": 0.0015
   },
+  "error_distributions": {
+    "params": {"threshold": 0.5, "min_area": 256, "close_k": 15, "n_files": 707},
+    "totals": {
+      "n_gt": 8199,
+      "n_pred": 8662,
+      "n_tp": 5259,
+      "recall": 0.6414,
+      "precision": 0.6071
+    },
+    "iou": {
+      "matched": {"n": 5259, "mean": 0.6765, "p50": 0.6825,
+                  "frac_ge_0.75": 0.2223, "frac_lt_0.10": 0.0},
+      "best_per_gt": {"n": 8199, "mean": 0.5014, "p50": 0.5983,
+                      "frac_ge_0.75": 0.1426, "frac_lt_0.10": 0.1706},
+      "best_per_pred": {"n": 8662, "mean": 0.4808, "p50": 0.5829,
+                        "frac_ge_0.75": 0.1350, "frac_lt_0.10": 0.1861}
+    },
+    "dice": {
+      "matched": {"n": 5259, "mean": 0.8038, "p50": 0.8113,
+                  "frac_ge_0.75": 0.7747, "frac_lt_0.10": 0.0},
+      "best_per_gt": {"n": 8199, "mean": 0.6135, "p50": 0.7487,
+                      "frac_ge_0.75": 0.4969, "frac_lt_0.10": 0.1667},
+      "best_per_pred": {"n": 8662, "mean": 0.5913, "p50": 0.7365,
+                        "frac_ge_0.75": 0.4703, "frac_lt_0.10": 0.1719}
+    },
+    "relations": {
+      "one_to_many_iou_0.1": {"frac_zero": 0.1706, "frac_one": 0.7816,
+                              "frac_multi": 0.0478},
+      "one_to_many_iou_0.5": {"frac_zero": 0.3586, "frac_one": 0.6414,
+                              "frac_multi": 0.0},
+      "many_to_one_iou_0.1": {"frac_zero": 0.1862, "frac_one": 0.7957,
+                              "frac_multi": 0.0181},
+      "many_to_one_iou_0.5": {"frac_zero": 0.3929, "frac_one": 0.6071,
+                              "frac_multi": 0.0}
+    }
+  },
   "phase4_detail": {
     "mean_corr_conv_pvt": 0.9132,
     "pvtv2_solo_pq": 0.3906,
