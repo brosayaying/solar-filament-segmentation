@@ -1,0 +1,133 @@
+{
+  "competition": {
+    "name": "Solar Filament Segmentation Challenge 2026",
+    "kaggle_ref": "filament-segmentation-2026",
+    "host": "Earth-Space AI Research (ESAIR) Lab",
+    "sponsor": "NSF National Solar Observatory (NSO) / AURA",
+    "metric": "Panoptic Quality (PQ)",
+    "deadline_utc": "2026-11-15 06:00",
+    "teams": 1152,
+    "data_license": "CC BY-NC 4.0"
+  },
+  "dataset": {
+    "train_files": 707,
+    "train_image_entries": 1154,
+    "train_annotations": 8199,
+    "test_files": 180,
+    "image_size": 2048,
+    "image_mode": "8-bit grayscale",
+    "copies_per_file": {"1": 411, "2": 145, "3": 151},
+    "filament_pixel_fraction_median": 0.0031,
+    "instance_area_px_median": 1228,
+    "n_dates": 656,
+    "n_iso_weeks": 343,
+    "test_2021_22_fraction": 0.117,
+    "train_2021_22_fraction": 0.057
+  },
+  "phases": [
+    {
+      "id": "phase1",
+      "name": "Segmentation baseline",
+      "change": "5-fold ConvNeXt-Small UNet, 512px patches, disk-flattened input",
+      "pq": 0.4220,
+      "sq": 0.6765,
+      "rq": 0.6238,
+      "ci": [0.4144, 0.4299],
+      "public_lb": 0.36,
+      "verdict": "baseline",
+      "n_files": 707,
+      "n_images": 1154
+    },
+    {
+      "id": "phase2",
+      "name": "Candidate re-scoring",
+      "change": "Re-rank connected components with a GBDT over 17 shape/intensity features",
+      "pq": 0.4406,
+      "sq": 0.6784,
+      "rq": 0.6495,
+      "ci": [0.4109, 0.4703],
+      "public_lb": 0.38,
+      "verdict": "accepted",
+      "paired_delta": 0.0154,
+      "paired_ci": [0.0109, 0.0199],
+      "n_files": 707,
+      "n_images": 1154
+    },
+    {
+      "id": "phase3",
+      "name": "GONG label transfer",
+      "change": "Transfer annotations from nearby GONG frames, 3.1x training data",
+      "pq": 0.4045,
+      "sq": 0.6667,
+      "rq": 0.6095,
+      "ci": null,
+      "public_lb": null,
+      "verdict": "rejected",
+      "paired_delta": -0.0150,
+      "paired_ci": null,
+      "n_files": 142,
+      "n_images": 224
+    },
+    {
+      "id": "phase4",
+      "name": "PVTv2-B2 ensemble diversity",
+      "change": "Add five PVTv2-B2 folds to the ConvNeXt ensemble",
+      "pq": 0.4098,
+      "sq": 0.6719,
+      "rq": 0.6099,
+      "ci": null,
+      "public_lb": null,
+      "verdict": "rejected",
+      "paired_delta": -0.0113,
+      "paired_ci": [-0.0239, 0.0001],
+      "n_files": 197,
+      "n_images": 351
+    }
+  ],
+  "phase2_detail": {
+    "n_candidates": 6166,
+    "n_candidate_files": 695,
+    "gbdt_oof_corr": 0.5749,
+    "cnn_oof_corr": 0.5070,
+    "oracle_ceiling_pq": 0.5028,
+    "oracle_gap": 0.0808,
+    "captured_gap": 0.0186,
+    "remaining_gap": 0.0622,
+    "tau": 0.35,
+    "candidate_threshold": 0.30,
+    "candidate_min_area": 128
+  },
+  "fp_anatomy": {
+    "tp": 5259,
+    "unmatched_gt": 1735,
+    "background": 1608,
+    "fragment": 60,
+    "fragment_fraction": 0.018,
+    "fragment_oracle_gain": 0.0015
+  },
+  "phase4_detail": {
+    "mean_corr_conv_pvt": 0.9132,
+    "pvtv2_solo_pq": 0.3906,
+    "convnext_solo_pq": 0.4177
+  },
+  "submission": {
+    "n_images": 180,
+    "n_candidates": 1591,
+    "n_kept": 1093,
+    "n_filaments": 1093,
+    "empty_images": [
+      "20170708164010Mh",
+      "20200310113230Ch",
+      "20211214174010Mh"
+    ],
+    "public_lb": 0.38,
+    "local_public_gap": 0.0586
+  },
+  "environment": {
+    "python": "3.12.3",
+    "torch": "2.14.1+cu130",
+    "timm": "1.0.30",
+    "gpu": "NVIDIA RTX 3090 24GB",
+    "amp_dtype": "bf16"
+  }
+}

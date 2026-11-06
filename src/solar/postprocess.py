@@ -49,7 +49,15 @@ def prob_to_labelmap(
         Morphological closing kernel size applied to the binary mask *before*
         labelling (0 = off). This is the single largest post-processing lever
         measured on this dataset (+0.012 PQ at k=15): it reconnects fragments
-        that the threshold split, which is 58.5 % of our false positives.
+        that the threshold split.
+
+        An earlier version of this docstring claimed fragments were "58.5 % of
+        our false positives" and that closing therefore addressed most of the
+        error. That was wrong. Measured on 707 OOF files, the false-positive
+        anatomy is 47.3 % background, 51.0 % unmatched GT, and only **1.8 %**
+        fragments. Closing helps by smoothing boundaries, not by merging
+        fragments, and the oracle ceiling for removing every fragment is
+        +0.0015 PQ. See ``v2/docs/PHASE2.md``.
 
     Returns
     -------

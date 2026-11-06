@@ -1,0 +1,178 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>Solar Filament Segmentation with Panoptic Quality</title>
+<style>
+  body { max-width: 52rem; margin: 3rem auto; padding: 0 1.5rem;
+         font: 16px/1.6 -apple-system, Segoe UI, Roboto, sans-serif;
+         color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #ddd; padding-bottom: .4rem; }
+  h2 { margin-top: 2.2rem; border-bottom: 1px solid #eee; }
+  table { border-collapse: collapse; margin: 1rem 0; font-size: 14px; }
+  th, td { border: 1px solid #ddd; padding: .4rem .7rem; text-align: left; }
+  th { background: #f6f6f6; }
+  code { background: #f3f3f3; padding: .1rem .3rem; border-radius: 3px; }
+  em { color: #555; }
+</style></head><body>
+<h1>Solar Filament Segmentation with Panoptic Quality</h1>
+<p><em>MAGFiLO 2026 Challenge — Technical Report</em> — Yasir Latif, 2026-11-06</p>
+<h2>Executive summary</h2>
+<p>We segment solar filaments in 2048x2048 H-alpha observations and score them with
+Panoptic Quality. The final pipeline reaches <strong>PQ 0.4406</strong>
+pooled out-of-fold over 707 training files, a paired gain of
+<strong>+0.0154</strong> over the segmentation-only baseline
+(95% CI [+0.0109, +0.0199]).
+The public leaderboard score is <strong>0.38</strong>.</p>
+<p>The method has two stages. A five-fold ConvNeXt-Small UNet produces a
+probability map; connected components of that map are then re-ranked by a
+gradient-boosted model over 17 shape and intensity features. The second stage
+is what earns the gain: it removes false positives without deleting true
+filaments, which is exactly the trade PQ rewards.</p>
+<p>Two further experiments were run and <strong>both failed</strong>. They are reported in full
+below rather than omitted, because a negative result that is measured properly
+is worth more than an unmeasured claim.</p>
+<h2>Data overview</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Training files</td>
+<td>707</td>
+</tr>
+<tr>
+<td>Training image entries (annotator copies)</td>
+<td>1154</td>
+</tr>
+<tr>
+<td>Annotations</td>
+<td>8199</td>
+</tr>
+<tr>
+<td>Test files</td>
+<td>180</td>
+</tr>
+<tr>
+<td>Image size</td>
+<td>2048x2048, 8-bit grayscale</td>
+</tr>
+<tr>
+<td>Median filament pixel fraction</td>
+<td>0.31%</td>
+</tr>
+<tr>
+<td>Median instance area</td>
+<td>1228 px</td>
+</tr>
+</tbody>
+</table>
+<p>Each image carries between one and three independent annotator copies, so the
+same pixels are scored against several ground truths. This is why the metric is
+pooled over copies rather than averaged per image: a prediction that satisfies
+one annotator but not another should be penalised, and pooling does that.</p>
+<h2>Results</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Change</th>
+<th>PQ</th>
+<th>SQ</th>
+<th>RQ</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Segmentation baseline</td>
+<td>5-fold ConvNeXt-Small UNet, 512px patches, disk-flattened input</td>
+<td>0.4220</td>
+<td>0.6765</td>
+<td>0.6238</td>
+<td>baseline</td>
+</tr>
+<tr>
+<td>Candidate re-scoring</td>
+<td>Re-rank connected components with a GBDT over 17 shape/intensity features</td>
+<td>0.4406</td>
+<td>0.6784</td>
+<td>0.6495</td>
+<td>accepted</td>
+</tr>
+<tr>
+<td>GONG label transfer</td>
+<td>Transfer annotations from nearby GONG frames, 3.1x training data</td>
+<td>0.4045</td>
+<td>0.6667</td>
+<td>0.6095</td>
+<td>rejected</td>
+</tr>
+<tr>
+<td>PVTv2-B2 ensemble diversity</td>
+<td>Add five PVTv2-B2 folds to the ConvNeXt ensemble</td>
+<td>0.4098</td>
+<td>0.6719</td>
+<td>0.6099</td>
+<td>rejected</td>
+</tr>
+</tbody>
+</table>
+<p>SQ is segmentation quality (mean IoU of matched instances) and RQ is
+recognition quality (how many instances were found at all). The split matters:
+SQ barely moves across every architecture tried, which says the boundary
+precision of the network is not the bottleneck. RQ is what the re-scoring stage
+improves.</p>
+<h2>Where the remaining error is</h2>
+<p>Scoring every candidate with its true label gives an oracle ceiling of
+<strong>PQ 0.5028</strong>, i.e. <strong>+0.0808</strong>
+above the baseline. The learned scorer captures
+<strong>+0.0186</strong> of that
+(23%), leaving
+<strong>+0.0622</strong> on the table.</p>
+<p>That gap is the single largest known opportunity in this project, and it is a
+<em>ranking</em> problem rather than a segmentation problem: the candidates already
+contain the right answer, the scorer just cannot tell which ones they are. The
+GBDT reaches a correlation of 0.575 with the true
+candidate quality; a CNN over image crops did worse
+(0.507), which suggests the 17 scalar features already
+encode most of what a crop would show.</p>
+<h2>Negative results</h2>
+<h3>More data did not help</h3>
+<p>The competition images are GONG H-alpha frames, so annotations can be
+transferred from nearby frames in the archive. This produced 3.1x the training
+data and a <strong>-0.0150</strong> change in PQ — a regression.</p>
+<p>The per-year breakdown explains it. Gains appeared exactly where the extra
+frames were concentrated (2021-22), and losses appeared in years where the
+transferred labels came from a different observation of an evolving object.
+Solar filaments change over hours; a polygon drawn on a frame six hours earlier
+is not the same object. The model learned boundary imprecision.</p>
+<h3>Architectural diversity did not help</h3>
+<p>Averaging a pyramid vision transformer (PVTv2-B2) with the ConvNeXt ensemble
+gave <strong>-0.0113</strong>. The mechanism is visible in one
+number: the two models' predictions correlate at
+<strong>0.913</strong>. They make the same mistakes, so averaging
+them cannot cancel those mistakes — it just pulls the better model toward the
+worse one (PVTv2 solo 0.3906 against ConvNeXt
+0.4177).</p>
+<h3>A claim we had to retract</h3>
+<p>An early analysis asserted that fragments were 58.5% of false positives, which
+would have justified a fragment-merging stage. Measured on 707 out-of-fold
+files, the true figure is <strong>1.8%</strong>,
+and the oracle gain from removing every fragment is
+<strong>+0.0015</strong>. The stage was cancelled before
+it was built. The false positives are overwhelmingly background and unmatched
+ground truth, not fragments.</p>
+<h2>Submission</h2>
+<p>1093 filaments across 180 test images,
+with 3 images predicted empty. The local-to-public gap is
+0.0586, which is not a constant across
+component types and should not be treated as a fixed offset.</p>
+<h2>Reproducibility</h2>
+<p>Code, pinned requirements and a pipeline notebook are in the public repository.
+Weights are published as release assets and fetched by
+<code>scripts/fetch_weights.py</code>. Inference requires no network access: the
+checkpoint supplies every weight, so the pretrained backbone is not downloaded.</p>
+</body></html>

@@ -41,6 +41,13 @@ pandas==3.1.0
 matplotlib==3.11.2
 tqdm==4.70.1
 
+# --- report generation ---------------------------------------------------
+# Used by notebooks/report_draft.ipynb to render the technical report from
+# v2/results/summary.json. Not needed to reproduce predictions.
+jinja2==3.1.6
+markdown==3.11.3
+ipython==9.18.1
+
 # --- optional: GONG archive access (Phase 3 only) ------------------------
 # Only needed to re-download the GONG frames used for the label-transfer
 # experiment. Not required to reproduce the submitted predictions.
