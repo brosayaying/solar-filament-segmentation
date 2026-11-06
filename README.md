@@ -42,7 +42,12 @@ python v2/scripts/predict_test_phase2.py --stage submit
 ```
 
 `notebooks/pipeline.ipynb` walks through the same steps with explanations and
-visualisations, and is the fastest way to understand the method.
+visualisations, and is the fastest way to understand the method. It runs the
+whole pipeline end to end — weights, preprocessing, ensemble, candidate
+scoring, submission CSV — and is the notebook the competition asks for.
+
+`notebooks/report_draft.ipynb` is a separate tool: it renders the technical
+report from `v2/results/summary.json`. It does not run inference.
 
 Inference runs fully offline: `build_model` is called with `pretrained=False`
 because the checkpoint supplies every weight, so no Hugging Face download is

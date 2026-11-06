@@ -38,6 +38,13 @@ cache/
 v2/data/
 v2/runs/
 
+# Notebook / inference artefacts
+# `weights/` is populated by scripts/fetch_weights.py (~994 MB).
+# `test_probs/` and `submission.csv` are written by notebooks/pipeline.ipynb.
+weights/
+test_probs/
+submission.csv
+
 # Experiment artifacts
 #
 # These are outputs, not source. They are large and regenerable, and they make
