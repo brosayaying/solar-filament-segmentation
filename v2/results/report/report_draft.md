@@ -1,14 +1,14 @@
 # Solar Filament Segmentation with Panoptic Quality
 
-*MAGFiLO 2026 Challenge — Technical Report* — Yasir Latif, 2026-11-06
+*MAGFiLO 2026 Challenge — Technical Report* — Yasir Latif, 2026-11-09
 
 ## Executive summary
 
 We segment solar filaments in 2048x2048 H-alpha observations and score them with
-Panoptic Quality. The final pipeline reaches **PQ 0.4406**
+Panoptic Quality. The final pipeline reaches **PQ 0.4386**
 pooled out-of-fold over 707 training files, a paired gain of
-**+0.0154** over the segmentation-only baseline
-(95% CI [+0.0109, +0.0199]).
+**+0.0166** over the segmentation-only baseline
+(95% CI [+0.0095, +0.0179]).
 The public leaderboard score is **0.38**.
 
 The method has two stages. A five-fold ConvNeXt-Small UNet produces a
@@ -43,7 +43,7 @@ one annotator but not another should be penalised, and pooling does that.
 | Phase | Change | PQ | SQ | RQ | Verdict |
 |---|---|---|---|---|---|
 | Segmentation baseline | 5-fold ConvNeXt-Small UNet, 512px patches, disk-flattened input | 0.4220 | 0.6765 | 0.6238 | baseline |
-| Candidate re-scoring | Re-rank connected components with a GBDT over 17 shape/intensity features | 0.4406 | 0.6784 | 0.6495 | accepted |
+| Candidate re-scoring | Re-rank connected components with a GBDT over 17 shape/intensity features | 0.4386 | 0.6786 | 0.6464 | accepted |
 | GONG label transfer | Transfer annotations from nearby GONG frames, 3.1x training data | 0.4045 | 0.6667 | 0.6095 | rejected |
 | PVTv2-B2 ensemble diversity | Add five PVTv2-B2 folds to the ConvNeXt ensemble | 0.4098 | 0.6719 | 0.6099 | rejected |
 
@@ -58,9 +58,9 @@ improves.
 Scoring every candidate with its true label gives an oracle ceiling of
 **PQ 0.5028**, i.e. **+0.0808**
 above the baseline. The learned scorer captures
-**+0.0186** of that
-(23%), leaving
-**+0.0622** on the table.
+**+0.0166** of that
+(21%), leaving
+**+0.0642** on the table.
 
 That gap is the single largest known opportunity in this project, and it is a
 *ranking* problem rather than a segmentation problem: the candidates already

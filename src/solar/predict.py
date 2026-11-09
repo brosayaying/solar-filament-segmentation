@@ -38,8 +38,9 @@ def predict_prob(
 ) -> np.ndarray:
     """Probability map for one (1, H, W) image.
 
-    ``tta`` averages the 4 flip variants. Measured +0.008 PQ locally, and it is
-    free at inference.
+    ``tta`` averages the 4 flip variants. Measured on the shipped ConvNeXt-Small
+    ensemble it is worth +0.0063 PQ at the segmentation stage and +0.0094 after
+    candidate re-scoring (paired +0.0073, CI [+0.0033, +0.0113]).
 
     ``tile`` runs the model over ``tile``-sized crops and stitches the result.
     Required for ViT encoders, which are strongly scale-sensitive: a model

@@ -8,12 +8,19 @@ Competition details, metric definition, and submission rules: [`docs/COMPETITION
 | Stage | Pooled OOF PQ | 95% CI | Public LB |
 |---|---|---|---|
 | Phase 1 — segmentation only | 0.4220 | [0.4144, 0.4299] | 0.36 |
-| Phase 2 — + candidate re-scoring | **0.4406** | [0.4109, 0.4703] | **0.38** |
+| Phase 2 — + candidate re-scoring | **0.4386** | [0.4109, 0.4703] | **0.38** |
 
-Paired gain of Phase 2 over Phase 1: **+0.0154**, CI [+0.0109, +0.0199] over
+Paired gain of Phase 2 over Phase 1: **+0.0166**, CI [+0.0095, +0.0179] over
 2,000 bootstraps on 707 files. Pooled OOF scores every file with the fold that
 did not train on it, against every annotator copy — the same protocol as the
 official scorer.
+
+The reported Phase 2 row is the configuration that was actually submitted: the
+GBDT scorer alone at an absolute `tau = 0.35`. A rank-average blend of the GBDT
+and a small CNN scored marginally higher on OOF (0.4406), but its threshold is a
+*quantile* of the candidate score distribution, and that distribution shifts on
+test (11.7% of test files are 2021–22 against 5.7% of training files). An
+absolute threshold on a calibrated score transfers; a rank threshold does not.
 
 Two experiments failed and are documented rather than hidden:
 
@@ -37,14 +44,22 @@ python scripts/fetch_weights.py
 #    (train/train_images, train/*.json, test/test_images)
 
 # 4. predictions -> submission CSV
-python v2/scripts/predict_test_phase2.py --stage probs
+python v2/scripts/predict_test_phase2.py --stage probs --tta
 python v2/scripts/predict_test_phase2.py --stage submit
 ```
+
+`--tta` enables the 4-flip average and reproduces `submissions/seg_v2_phase2_tta.csv`
+(1069 filaments). Omitting it reproduces `submissions/seg_v2_phase2.csv`
+(1093 filaments), which is what the first submission used because the flag
+defaults to off. Both scored 0.38 publicly; the TTA variant is the protocol the
+report describes.
 
 `notebooks/pipeline.ipynb` walks through the same steps with explanations and
 visualisations, and is the fastest way to understand the method. It runs the
 whole pipeline end to end — weights, preprocessing, ensemble, candidate
-scoring, submission CSV — and is the notebook the competition asks for.
+scoring, submission CSV — and is the notebook the competition asks for. Its
+output is byte-identical to `submissions/seg_v2_phase2_tta.csv`
+(sha256 `dd27cca18fcf4e71`, 298,124 bytes).
 
 `notebooks/report_draft.ipynb` is a separate tool: it renders the technical
 report from `v2/results/summary.json`. It does not run inference.

@@ -96,7 +96,7 @@ def plot_pipeline(out: Path) -> None:
 
     # Row 2: candidates -> scoring -> output
     box(9.65, 0.35, 3.2, 1.75, "Submission",
-        "COCO RLE per instance\n1093 filaments\n180 images", purple)
+        "COCO RLE per instance\n1069 filaments\n180 images", purple)
     box(6.35, 0.35, 2.9, 1.75, "Re-score candidates",
         "GBDT over 17 features\nq-hat > tau = 0.35\nkeeps / rejects", orange)
     box(3.05, 0.35, 2.9, 1.75, "Candidates",
@@ -106,9 +106,11 @@ def plot_pipeline(out: Path) -> None:
     arrow(9.65, 1.22, 9.25, 1.22)
     arrow(6.35, 1.22, 5.95, 1.22)
 
-    # Annotation of what the re-scoring stage buys.
+    # Annotation of what the re-scoring stage buys. These are the numbers for
+    # the shipped configuration (GBDT alone at tau 0.35), not the best-OOF
+    # blend, so the figure and the results table agree.
     ax.text(6.5, 0.12,
-            "re-scoring: PQ 0.4220 -> 0.4406  (+0.0154, CI [+0.0109, +0.0199])",
+            "re-scoring: PQ 0.4220 -> 0.4386  (+0.0166, CI [+0.0095, +0.0179])",
             ha="center", fontsize=8, style="italic", color="#444444")
 
     ax.text(0.15, 4.42, "End-to-end pipeline", fontsize=12, fontweight="bold")

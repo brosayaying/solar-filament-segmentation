@@ -18,7 +18,14 @@ candidate distribution -- a distribution that differs on test (different
 instrument, 11.7 % of test files are 2021-22 against 5.7 % of train). An absolute
 threshold on a calibrated score transfers; a rank threshold does not.
 
-    python v2/scripts/predict_test_phase2.py --stage probs
+``--tta`` averages four flip variants per fold. Measured on this pipeline it is
+worth +0.0063 PQ at the segmentation stage and +0.0094 after re-scoring (paired
++0.0073, CI [+0.0033, +0.0113]). It defaults to **off** because that is how the
+first submission was generated; pass it explicitly to reproduce
+``submissions/seg_v2_phase2_tta.csv`` (1069 filaments) rather than
+``submissions/seg_v2_phase2.csv`` (1093 filaments). Both scored 0.38 publicly.
+
+    python v2/scripts/predict_test_phase2.py --stage probs --tta
     python v2/scripts/predict_test_phase2.py --stage submit
 """
 

@@ -14,13 +14,13 @@
   em { color: #555; }
 </style></head><body>
 <h1>Solar Filament Segmentation with Panoptic Quality</h1>
-<p><em>MAGFiLO 2026 Challenge — Technical Report</em> — Yasir Latif, 2026-11-06</p>
+<p><em>MAGFiLO 2026 Challenge — Technical Report</em> — Yasir Latif, 2026-11-09</p>
 <h2>Executive summary</h2>
 <p>We segment solar filaments in 2048x2048 H-alpha observations and score them with
-Panoptic Quality. The final pipeline reaches <strong>PQ 0.4406</strong>
+Panoptic Quality. The final pipeline reaches <strong>PQ 0.4386</strong>
 pooled out-of-fold over 707 training files, a paired gain of
-<strong>+0.0154</strong> over the segmentation-only baseline
-(95% CI [+0.0109, +0.0199]).
+<strong>+0.0166</strong> over the segmentation-only baseline
+(95% CI [+0.0095, +0.0179]).
 The public leaderboard score is <strong>0.38</strong>.</p>
 <p>The method has two stages. A five-fold ConvNeXt-Small UNet produces a
 probability map; connected components of that map are then re-ranked by a
@@ -97,9 +97,9 @@ one annotator but not another should be penalised, and pooling does that.</p>
 <tr>
 <td>Candidate re-scoring</td>
 <td>Re-rank connected components with a GBDT over 17 shape/intensity features</td>
-<td>0.4406</td>
-<td>0.6784</td>
-<td>0.6495</td>
+<td>0.4386</td>
+<td>0.6786</td>
+<td>0.6464</td>
 <td>accepted</td>
 </tr>
 <tr>
@@ -129,9 +129,9 @@ improves.</p>
 <p>Scoring every candidate with its true label gives an oracle ceiling of
 <strong>PQ 0.5028</strong>, i.e. <strong>+0.0808</strong>
 above the baseline. The learned scorer captures
-<strong>+0.0186</strong> of that
-(23%), leaving
-<strong>+0.0622</strong> on the table.</p>
+<strong>+0.0166</strong> of that
+(21%), leaving
+<strong>+0.0642</strong> on the table.</p>
 <p>That gap is the single largest known opportunity in this project, and it is a
 <em>ranking</em> problem rather than a segmentation problem: the candidates already
 contain the right answer, the scorer just cannot tell which ones they are. The

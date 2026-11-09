@@ -66,6 +66,10 @@ def main() -> None:
     ap.add_argument("--p1-min-area", type=int, default=256)
     ap.add_argument("--p1-close-k", type=int, default=15)
     ap.add_argument("--n-boot", type=int, default=2000)
+    ap.add_argument("--paired-variant", default=None,
+                    help="variant to report the paired CI for (default: best OOF)")
+    ap.add_argument("--paired-tau", type=float, default=None,
+                    help="tau to report the paired CI for (default: best OOF)")
     ap.add_argument("--out", default=str(P2 / "final.json"))
     args = ap.parse_args()
 
@@ -167,18 +171,37 @@ def main() -> None:
               f"{s['pq'] - s1['pq']:>+8.4f}")
 
     best = max(rows, key=lambda r: r["pq"])
+
+    # The best OOF row and the shipped configuration are not the same thing.
+    # The best OOF row is the rank-average blend, whose threshold is a quantile
+    # of the candidate score distribution; that distribution shifts on test
+    # (different instrument, 11.7% of test files are 2021-22 against 5.7% of
+    # train), so a quantile threshold does not transfer. The shipped scorer is
+    # the GBDT at an absolute tau. Report the CI for whichever is asked for.
+    if args.paired_variant is None:
+        sel = (best["variant"], best["tau"])
+    else:
+        sel = (args.paired_variant, args.paired_tau)
+        if sel not in accs:
+            raise SystemExit(f"no accumulator for {sel}; have {sorted(accs)}")
+    sel_row = next(r for r in rows
+                   if r["variant"] == sel[0] and r["tau"] == sel[1])
+
     a = per_image_pq(acc1)
-    b = per_image_pq(accs[(best["variant"], best["tau"])])
+    b = per_image_pq(accs[sel])
     mean_d, lo, hi = paired_ci(a, b, args.n_boot)
     print()
-    print(f"best: {best['variant']} tau {best['tau']} -> PQ {best['pq']:.4f} "
-          f"({best['dPQ']:+.4f})")
+    print(f"best OOF  : {best['variant']} tau {best['tau']} -> PQ "
+          f"{best['pq']:.4f} ({best['dPQ']:+.4f})")
+    print(f"paired for: {sel[0]} tau {sel[1]} -> PQ {sel_row['pq']:.4f} "
+          f"({sel_row['dPQ']:+.4f})")
     print(f"paired per-image: {mean_d:+.4f}  CI [{lo:+.4f}, {hi:+.4f}]  "
           f"{'EXCLUDES 0' if lo > 0 or hi < 0 else 'includes 0'}")
-    print(f"FP {(best['fp'] - s1['fp']) / s1['fp']:+.1%} (target <= -25%)   "
-          f"FN {(best['fn'] - s1['fn']) / s1['fn']:+.1%} (target <= +5%)")
+    print(f"FP {(sel_row['fp'] - s1['fp']) / s1['fp']:+.1%} (target <= -25%)   "
+          f"FN {(sel_row['fn'] - s1['fn']) / s1['fn']:+.1%} (target <= +5%)")
 
     json.dump({"phase1": s1, "rows": rows, "best": best,
+               "paired_for": {"variant": sel[0], "tau": sel[1], **sel_row},
                "paired": {"mean": mean_d, "lo": lo, "hi": hi}},
               open(args.out, "w"), indent=2)
     print(f"\nwrote {args.out}")

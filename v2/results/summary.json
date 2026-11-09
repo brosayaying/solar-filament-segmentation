@@ -16,7 +16,11 @@
     "test_files": 180,
     "image_size": 2048,
     "image_mode": "8-bit grayscale",
-    "copies_per_file": {"1": 411, "2": 145, "3": 151},
+    "copies_per_file": {
+      "1": 411,
+      "2": 145,
+      "3": 151
+    },
     "filament_pixel_fraction_median": 0.0031,
     "instance_area_px_median": 1228,
     "n_dates": 656,
@@ -29,10 +33,13 @@
       "id": "phase1",
       "name": "Segmentation baseline",
       "change": "5-fold ConvNeXt-Small UNet, 512px patches, disk-flattened input",
-      "pq": 0.4220,
+      "pq": 0.422,
       "sq": 0.6765,
       "rq": 0.6238,
-      "ci": [0.4144, 0.4299],
+      "ci": [
+        0.4144,
+        0.4299
+      ],
       "public_lb": 0.36,
       "verdict": "baseline",
       "n_files": 707,
@@ -42,16 +49,35 @@
       "id": "phase2",
       "name": "Candidate re-scoring",
       "change": "Re-rank connected components with a GBDT over 17 shape/intensity features",
-      "pq": 0.4406,
-      "sq": 0.6784,
-      "rq": 0.6495,
-      "ci": [0.4109, 0.4703],
+      "pq": 0.4386,
+      "sq": 0.6786,
+      "rq": 0.6464,
+      "ci": [
+        0.4109,
+        0.4703
+      ],
       "public_lb": 0.38,
       "verdict": "accepted",
-      "paired_delta": 0.0154,
-      "paired_ci": [0.0109, 0.0199],
+      "paired_delta": 0.0166,
+      "paired_ci": [
+        0.0095,
+        0.0179
+      ],
       "n_files": 707,
-      "n_images": 1154
+      "n_images": 1154,
+      "note": "shipped config: GBDT alone at absolute tau 0.35 (not the rank-average blend, whose quantile threshold does not transfer to test)",
+      "blend_oof_pq": 0.4406,
+      "tta": {
+        "phase1_pq": 0.422,
+        "phase2_pq": 0.4386,
+        "no_tta_phase1_pq": 0.4158,
+        "no_tta_phase2_pq": 0.4292,
+        "paired_delta": 0.0073,
+        "paired_ci": [
+          0.0033,
+          0.0113
+        ]
+      }
     },
     {
       "id": "phase3",
@@ -63,7 +89,7 @@
       "ci": null,
       "public_lb": null,
       "verdict": "rejected",
-      "paired_delta": -0.0150,
+      "paired_delta": -0.015,
       "paired_ci": null,
       "n_files": 142,
       "n_images": 224
@@ -79,7 +105,10 @@
       "public_lb": null,
       "verdict": "rejected",
       "paired_delta": -0.0113,
-      "paired_ci": [-0.0239, 0.0001],
+      "paired_ci": [
+        -0.0239,
+        0.0001
+      ],
       "n_files": 197,
       "n_images": 351
     }
@@ -88,14 +117,15 @@
     "n_candidates": 6166,
     "n_candidate_files": 695,
     "gbdt_oof_corr": 0.5749,
-    "cnn_oof_corr": 0.5070,
+    "cnn_oof_corr": 0.507,
     "oracle_ceiling_pq": 0.5028,
     "oracle_gap": 0.0808,
-    "captured_gap": 0.0186,
-    "remaining_gap": 0.0622,
+    "captured_gap": 0.0166,
+    "remaining_gap": 0.0642,
     "tau": 0.35,
-    "candidate_threshold": 0.30,
-    "candidate_min_area": 128
+    "candidate_threshold": 0.3,
+    "candidate_min_area": 128,
+    "captured_fraction": 0.205
   },
   "fp_anatomy": {
     "tp": 5259,
@@ -106,7 +136,12 @@
     "fragment_oracle_gain": 0.0015
   },
   "error_distributions": {
-    "params": {"threshold": 0.5, "min_area": 256, "close_k": 15, "n_files": 707},
+    "params": {
+      "threshold": 0.5,
+      "min_area": 256,
+      "close_k": 15,
+      "n_files": 707
+    },
     "totals": {
       "n_gt": 8199,
       "n_pred": 8662,
@@ -115,30 +150,72 @@
       "precision": 0.6071
     },
     "iou": {
-      "matched": {"n": 5259, "mean": 0.6765, "p50": 0.6825,
-                  "frac_ge_0.75": 0.2223, "frac_lt_0.10": 0.0},
-      "best_per_gt": {"n": 8199, "mean": 0.5014, "p50": 0.5983,
-                      "frac_ge_0.75": 0.1426, "frac_lt_0.10": 0.1706},
-      "best_per_pred": {"n": 8662, "mean": 0.4808, "p50": 0.5829,
-                        "frac_ge_0.75": 0.1350, "frac_lt_0.10": 0.1861}
+      "matched": {
+        "n": 5259,
+        "mean": 0.6765,
+        "p50": 0.6825,
+        "frac_ge_0.75": 0.2223,
+        "frac_lt_0.10": 0.0
+      },
+      "best_per_gt": {
+        "n": 8199,
+        "mean": 0.5014,
+        "p50": 0.5983,
+        "frac_ge_0.75": 0.1426,
+        "frac_lt_0.10": 0.1706
+      },
+      "best_per_pred": {
+        "n": 8662,
+        "mean": 0.4808,
+        "p50": 0.5829,
+        "frac_ge_0.75": 0.135,
+        "frac_lt_0.10": 0.1861
+      }
     },
     "dice": {
-      "matched": {"n": 5259, "mean": 0.8038, "p50": 0.8113,
-                  "frac_ge_0.75": 0.7747, "frac_lt_0.10": 0.0},
-      "best_per_gt": {"n": 8199, "mean": 0.6135, "p50": 0.7487,
-                      "frac_ge_0.75": 0.4969, "frac_lt_0.10": 0.1667},
-      "best_per_pred": {"n": 8662, "mean": 0.5913, "p50": 0.7365,
-                        "frac_ge_0.75": 0.4703, "frac_lt_0.10": 0.1719}
+      "matched": {
+        "n": 5259,
+        "mean": 0.8038,
+        "p50": 0.8113,
+        "frac_ge_0.75": 0.7747,
+        "frac_lt_0.10": 0.0
+      },
+      "best_per_gt": {
+        "n": 8199,
+        "mean": 0.6135,
+        "p50": 0.7487,
+        "frac_ge_0.75": 0.4969,
+        "frac_lt_0.10": 0.1667
+      },
+      "best_per_pred": {
+        "n": 8662,
+        "mean": 0.5913,
+        "p50": 0.7365,
+        "frac_ge_0.75": 0.4703,
+        "frac_lt_0.10": 0.1719
+      }
     },
     "relations": {
-      "one_to_many_iou_0.1": {"frac_zero": 0.1706, "frac_one": 0.7816,
-                              "frac_multi": 0.0478},
-      "one_to_many_iou_0.5": {"frac_zero": 0.3586, "frac_one": 0.6414,
-                              "frac_multi": 0.0},
-      "many_to_one_iou_0.1": {"frac_zero": 0.1862, "frac_one": 0.7957,
-                              "frac_multi": 0.0181},
-      "many_to_one_iou_0.5": {"frac_zero": 0.3929, "frac_one": 0.6071,
-                              "frac_multi": 0.0}
+      "one_to_many_iou_0.1": {
+        "frac_zero": 0.1706,
+        "frac_one": 0.7816,
+        "frac_multi": 0.0478
+      },
+      "one_to_many_iou_0.5": {
+        "frac_zero": 0.3586,
+        "frac_one": 0.6414,
+        "frac_multi": 0.0
+      },
+      "many_to_one_iou_0.1": {
+        "frac_zero": 0.1862,
+        "frac_one": 0.7957,
+        "frac_multi": 0.0181
+      },
+      "many_to_one_iou_0.5": {
+        "frac_zero": 0.3929,
+        "frac_one": 0.6071,
+        "frac_multi": 0.0
+      }
     }
   },
   "phase4_detail": {

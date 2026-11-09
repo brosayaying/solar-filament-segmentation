@@ -43,7 +43,7 @@
 \email{brosayaying@users.noreply.github.com}
 
 \begin{abstract}
-    This report describes our solution to the Solar Filament Segmentation Challenge~2026, a Kaggle competition on automatic segmentation of solar filaments in GONG H-$\alpha$ observations. Our system reaches a pooled out-of-fold Panoptic Quality (PQ) of 0.4406. Rather than report that number alone, we use PQ's factorisation into Segmentation Quality (SQ) and Recognition Quality (RQ) to diagnose where the remaining error lies. SQ is invariant at $0.68$ across four architectures spanning convolutional and transformer encoders, while RQ is what moves; the full Dice and IoU distributions confirm that the error is dominated by \emph{missed instances} rather than imprecise boundaries, with $16.7\%$ of ground-truth filaments scoring below $0.10$ Dice. At the metric's own matching threshold there is no fragmentation and no merging, which rules out a class of post-processing fixes. Two substantial interventions---tripling the training data via cross-instrument label transfer, and adding a transformer to the ensemble---both failed, and we report the mechanism behind each failure.
+    This report describes our solution to the Solar Filament Segmentation Challenge~2026, a Kaggle competition on automatic segmentation of solar filaments in GONG H-$\alpha$ observations. Our system reaches a pooled out-of-fold Panoptic Quality (PQ) of 0.4386. Rather than report that number alone, we use PQ's factorisation into Segmentation Quality (SQ) and Recognition Quality (RQ) to diagnose where the remaining error lies. SQ is invariant at $0.68$ across four architectures spanning convolutional and transformer encoders, while RQ is what moves; the full Dice and IoU distributions confirm that the error is dominated by \emph{missed instances} rather than imprecise boundaries, with $16.7\%$ of ground-truth filaments scoring below $0.10$ Dice. At the metric's own matching threshold there is no fragmentation and no merging, which rules out a class of post-processing fixes. Two substantial interventions---tripling the training data via cross-instrument label transfer, and adding a transformer to the ensemble---both failed, and we report the mechanism behind each failure.
 \end{abstract}
 
 \maketitle
@@ -73,6 +73,11 @@
 \subsection{Segmentation}
     A ConvNeXt-Small encoder \cite{convnext} with an ImageNet-pretrained initialisation feeds a UNet decoder of width 128. Because the finest ConvNeXt feature map is at stride 4, an 11\,px filament cannot be reconstructed from it alone, so a stride-1 stem convolution on the input is concatenated into the final decoder block. Training uses $512$\,px patches, two samples per image, batch size 12, AdamW at $3\times10^{-4}$ with cosine decay, and a BCE + Dice loss under bf16 autocast.\footnote{fp16 diverged to NaN on this architecture; bf16 has fp32's exponent range and does not.}
 
+\subsection{Inference}
+    Each of the five folds predicts the full $2048\times2048$ image, and the five probability maps are averaged before any thresholding. Each fold's map is itself the mean of four flip variants (identity, horizontal, vertical, both). Averaging in probability space rather than in label space matters: thresholding first and then voting would let a filament that only three of five folds detect be outvoted, whereas averaging lets a consistent weak response accumulate.
+
+    We measured the flip-TTA contribution on the shipped pipeline by dumping the out-of-fold probabilities twice, identical except for the flag. TTA is worth $+0.0063$ PQ at the segmentation stage and $+0.0094$ after re-scoring (paired $+0.0073$, CI $[+0.0033, +0.0113]$), so it is real but small. It did not survive the two-decimal public readout: submissions with and without TTA both scored $0.38$.
+
 \subsection{Candidate re-scoring}
     Thresholding the probability map at a low value and labelling connected components deliberately over-produces candidates: a candidate rejected later costs nothing, whereas a filament that never becomes a candidate is unrecoverable. Each candidate is described by 17 scalars---area, elongation, length, orientation, mean/max/90th-percentile probability, contrast against a surrounding ring, bounding-box dimensions, fill ratio, border contact, and centroid---and a gradient-boosted model predicts its probability of being a true positive. Candidates below $\tau=0.35$ are discarded.
 
@@ -99,7 +104,9 @@
 \section{Evaluation}\label{sec:evaluation}
 
 \subsection{Overall results}
-    Table~\ref{tab:results} reports the four configurations we evaluated. The segmentation baseline reaches PQ $0.4220$; candidate re-scoring raises it to $0.4406$, a paired gain of $+0.0154$ with a $95\%$ bootstrap CI of $[+0.0109, +0.0199]$ over 2{,}000 resamples of the 707 files. The public leaderboard score is $0.38$.
+    Table~\ref{tab:results} reports the four configurations we evaluated. The segmentation baseline reaches PQ $0.4220$; candidate re-scoring raises it to $0.4386$, a paired gain of $+0.0166$ with a $95\%$ bootstrap CI of $[+0.0095, +0.0179]$ over 2{,}000 resamples of the 707 files. The public leaderboard score is $0.38$.
+
+    The row reported is the configuration we actually submitted: the GBDT scorer alone at an absolute $\tau=0.35$. A rank-average blend of the GBDT and a small CNN scored marginally higher on OOF ($0.4406$), but its threshold is a \emph{quantile} of the candidate score distribution, and that distribution shifts on test---$11.7\%$ of test files are from 2021--22 against $5.7\%$ of training files. An absolute threshold on a calibrated score transfers; a rank threshold does not. The blend's $+0.0020$ is also well inside the CI width, so we did not spend a submission on it.
 
 \begin{table}[t]
 \centering
@@ -111,7 +118,7 @@
 Configuration & PQ & SQ & RQ \\
 \midrule
 Segmentation only        & 0.4220 & 0.6765 & 0.6238 \\
-+ candidate re-scoring   & \textbf{0.4406} & 0.6784 & 0.6495 \\
++ candidate re-scoring   & \textbf{0.4386} & 0.6786 & 0.6464 \\
 \midrule
 + GONG label transfer    & 0.4045 & 0.6667 & 0.6095 \\
 + PVTv2-B2 ensemble      & 0.4098 & 0.6719 & 0.6099 \\
@@ -120,7 +127,7 @@ Segmentation only        & 0.4220 & 0.6765 & 0.6238 \\
 \end{table}
 
 \subsection{SQ does not move}
-    The most informative column of Table~\ref{tab:results} is SQ. Across four architectures---resnet34, DeepCrack with a decoder, ConvNeXt-Small, and PVTv2-B2 \cite{pvt}---SQ stays within $0.667$--$0.678$. Re-scoring improves RQ by $+0.026$ and SQ by only $+0.002$.
+    The most informative column of Table~\ref{tab:results} is SQ. Across four architectures---resnet34, DeepCrack with a decoder, ConvNeXt-Small, and PVTv2-B2 \cite{pvt}---SQ stays within $0.667$--$0.679$. Re-scoring improves RQ by $+0.023$ and SQ by only $+0.002$.
 
     This is a strong constraint. If boundary precision were the bottleneck, a transformer with global receptive field should have moved SQ. It did not. The network is already delineating filaments about as well as this supervision allows, and the remaining error lies elsewhere.
 
@@ -178,7 +185,7 @@ One prediction merging $k>1$ GT   & 1.8\% & 0.0\% \\
     \textbf{Architectural diversity without error diversity.} Ensembles help when members make \emph{uncorrelated} errors. Our five ConvNeXt folds share an architecture, a preprocessing pipeline and a loss, so averaging them mostly reduces variance. A pyramid vision transformer (PVTv2-B2) was expected to fail differently: self-attention gives every output position a path to every input position, so a filament is seen as a whole shape rather than through stacked local receptive fields. PVTv2 scored $0.3906$ solo against ConvNeXt's $0.4177$, which is expected for a diversity member. But averaging the two gave $-0.0113$ (CI $[-0.0239, +0.0001]$). The mechanism is one number: the two models' predictions correlate at $\mathbf{0.913}$. Two predictors that agree on $91\%$ of pixels cannot cancel each other's mistakes; the average lands between them and below the better one.
 
 \subsection{Strengths, weaknesses, and next steps}
-    The system's strength is that it is well calibrated about \emph{what it has found}: matched instances reach Dice $0.804$, and the re-scoring stage removes false positives without deleting true filaments. Its weakness is recall. Scoring every candidate with its true label gives an oracle ceiling of PQ $0.5028$, i.e.\ $+0.0808$ above the segmentation baseline; the learned scorer captures $+0.0186$ of that ($23\%$), leaving $+0.0622$ unclaimed.
+    The system's strength is that it is well calibrated about \emph{what it has found}: matched instances reach Dice $0.804$, and the re-scoring stage removes false positives without deleting true filaments. Its weakness is recall. Scoring every candidate with its true label gives an oracle ceiling of PQ $0.5028$, i.e.\ $+0.0808$ above the segmentation baseline; the learned scorer captures $+0.0166$ of that ($21\%$), leaving $+0.0642$ unclaimed.
 
     This is the largest known opportunity, and it is a ranking problem rather than a segmentation problem. Since the error is dominated by missed instances, and those instances are largely \emph{present as candidates} and being discarded, the productive direction is a scorer optimised for recall against PQ's instance-count objective rather than for average precision. A scorer trained to maximise average precision will happily discard low-confidence candidates that are nonetheless true positives, because they contribute little to the ranking metric; PQ does not care about ranking, only about the count of matched instances. That objective mismatch is a plausible explanation for capturing only $23\%$ of the oracle gap.
 
